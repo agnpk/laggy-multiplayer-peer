@@ -32,7 +32,11 @@ multiplayer.multiplayer_peer = LaggyMultiplayerPeer.create(enet_peer, 0.2, 0.2, 
 - The addon has only been tested on Linux. Other platforms need testing.
 
 ## Installation
-- Grab the artifact zip file from GitHub action run in the `main` branch, and extract the `addons/` folder from the zip to the root of your project.
+- Close the Godot editor before installing this add-on!
+
+- Download and open the LaggyMultiplayerPeer zip from the latest release, and extract the `addons/` folder from the zip to the root of your project.
+
+- To uninstall, just delete the `laggy-multiplayer-peer` folder inside of `res://addons/`.
 
 ## Development
 - Make sure the repository has been cloned using `git clone --recursive`. If it hasn't, initialize and sync submodules by running `git submodule init` and `git submodule update --recursive`.
