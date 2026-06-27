@@ -70,8 +70,25 @@ jobs:
           mkdir -p artifact/addons/laggy-multiplayer-peer/demo
           mv demo/bin artifact/addons/laggy-multiplayer-peer/bin
           mv demo/scenes artifact/addons/laggy-multiplayer-peer/demo/scenes
-          mv demo/check_extension.* artifact/addons/laggy-multiplayer-peer/demo/
-          find . \( -name *.exp -or -name *.lib -or -name *.pdb \) -exec rm -f {} \;
+          shopt -s nullglob
+          for file in demo/check_extension.*; do mv "$file" artifact/addons/laggy-multiplayer-peer/demo/; done
+          find artifact -type f \( -name '*.exp' -or -name '*.lib' -or -name '*.pdb' -or -name '*.a' \) -delete
+
+      - name: Audit Packaged Files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+
+          files = []
+          for root, _, names in os.walk("artifact"):
+              for name in names:
+                  path = os.path.join(root, name)
+                  files.append((os.path.getsize(path), path))
+
+          for size, path in sorted(files):
+              print(f"{size:>12} {path}")
+          PY
 
       # Upload the build
       - name: Upload Artifact
@@ -111,7 +128,20 @@ jobs:
       - name: Zip Addon
         run: |
           cd release-artifact
-          zip -r ../LaggyMultiplayerPeer-${{ github.ref_name }}.zip addons/
+          find addons -type f \( -name '*.exp' -or -name '*.lib' -or -name '*.pdb' -or -name '*.a' \) -delete
+          python - <<'PY'
+          import os
+
+          files = []
+          for root, _, names in os.walk("addons"):
+              for name in names:
+                  path = os.path.join(root, name)
+                  files.append((os.path.getsize(path), path))
+
+          for size, path in sorted(files):
+              print(f"{size:>12} {path}")
+          PY
+          find addons -type f -print | LC_ALL=C sort | zip -X -9 ../LaggyMultiplayerPeer-${{ github.ref_name }}.zip -@
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
